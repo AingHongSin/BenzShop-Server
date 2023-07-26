@@ -1,17 +1,15 @@
 const express = require('express');
 const app = express();
 
-require("./src/route/index")
+app.use(express.json());
+
 require("./src/config/index")()
+require("./src/config/session")(app)
 
-// app.use(require("./src/route"))
+app.use(require("./src/route/index"))
 
-app.post('/register', (req, res) => {
-    const parameter = req.body
-    console.log(parameter);
-    const result = register(parameter)
-    res.send(result)
-})
+ 
+
 
 
 const port = process.env.port || 30002

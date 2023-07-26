@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
 const userSchema = new mongoose.Schema({
     username: {
@@ -29,22 +30,6 @@ const userSchema = new mongoose.Schema({
         type: String,
         require: true
     },
-    cart: {
-        type:Array,
-        default:[],
-        require: false
-    },
-    orders: {
-        type: Array,
-        default: [],
-        require:false,
-    },
-    paymentmethods: {
-        type:Array,
-        default: [],
-        require: false
-    }
-
 
 },
 {

@@ -1,10 +1,10 @@
 const users = require('../models/user');
+const { encryptPass, decryptPass } = require('../config/encrypt')
 const jwt = require('jsonwebtoken');
 
 
 const register = async(parameter)=>{
     const { username,firstname,lastname,email,password,phone } = parameter;
-    // console.log(parameter);
     try{
         var existing = await users.findOne({email});
         console.log(existing);
@@ -27,12 +27,12 @@ const register = async(parameter)=>{
         }
         console.log(newUser);
         const createUser = await users.create(newUser);
-
         return {
             success: true,
             data: createUser
         }
     }catch(err){
+        console.log(err)
         return {
             success: false,
             error: err
@@ -52,13 +52,14 @@ const login = async(email,password)=>{
         if(!decrypt){
             throw "Incorrect password!";
         }
-        const token = jwt.sign({email,password}, '123');
+        const token = jwt.sign({email,password}, 'S@ecret');
         return {
             success: true,
             data: {validEmail, token}
             
         }
     }catch(err){
+        console.log(err)
         return {
             success: false,
             error: err
