@@ -28,4 +28,26 @@ router.post('/login', ensureSignedOut, joiValidation(loginValidation), async (re
     res.json(result)
 })
 
+router.put('/update/:id', ensureSignedIn, currentUser, async (req, res) => {
+    const newInfo = req.body
+    const user = req.user
+
+    const result = await updateUser(user, newInfo)
+    res.json(result)
+})
+
+router.put('/changepassword/:id', ensureSignedIn, currentUser, async (req, res) => {
+    const newPassword = req.body
+    const user = req.user
+
+    const result = await updatePass(user, newPassword)
+    res.json(result)
+})
+
+router.post('/logout', ensureSignedIn, currentUser, async (req, res) => {
+    const result = await logout(req.session)
+    console.log('cookie: ', req.cookies)
+    res.clearCookie(req.cookies)
+    res.json(result)
+})
 module.exports = router;

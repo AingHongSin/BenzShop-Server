@@ -64,9 +64,7 @@ const login = async(email,password)=>{
             success: false,
             error: err
         }
-
     }
-    
 }
 
 
@@ -80,4 +78,55 @@ const getMe = async(email)=>{
     }
 }
 
-module.exports = {register, login, getMe}
+const lgoout = async(session) => {
+    try {
+        session.distroy()
+
+        return {
+            success: true,
+            data:"Logged out successfully!"
+        }
+    } catch(error) {
+        return {
+            success: false,
+            error: error
+        }
+    }
+}
+
+const updateUser = async ({email}, newData) => {
+    try {
+         console.log(newData);
+         await user.findOneAndUpdate({email}, newData)
+
+         const result = await usere.findOne({email})
+
+         return {
+            success: true, 
+            data: result
+         }
+    } catch(error) {
+        return {
+            success: false, 
+            message: error
+         }
+    }
+}
+
+const updatePassword = async ({email}, newPassword) => {
+    try{
+        const encryptPwd = await encryptPass(newPassword);
+        await users.findOneAndUpdate({email},{"password":encryptPwd});
+        // console.log(users);
+        const user = await users.findOne({email});
+        console.log(user);
+        return {
+            success: true,
+            data: user
+        }
+    }catch(err){
+        throw "Invalid User!"
+    }
+}
+
+module.exports = {register, login, getMe, lgoout, updateUser, updatePassword}
