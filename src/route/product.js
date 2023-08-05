@@ -1,7 +1,9 @@
+const express = require('express')
+const fileUpload = require("express-fileupload")
+
 const { createProduct, getAllProducts, getProductById, updateProduct, searchProductByName, deleteProduct,  } = require("../services/product")
 const {ensureSignedIn, currentUser} = require("../middleware/authentication")
-
-const express = require('express')
+const upload = require('../middleware/upload')
 const router = express.Router()
 
 router.get('/', async(req, res) => {
@@ -10,15 +12,15 @@ router.get('/', async(req, res) => {
     res.json(products);
 })
 
-
-router.post('/create', ensureSignedIn, async (req, res) => {
+router.post('/create', ensureSignedIn, upload.array('images'), async (req, res) => {
     const rawProduct = req.body
-    const result = await createProduct(rawProduct);
+    const files = req.files
+    const product = JSON.parse(rawProduct.data)
 
+    const result = await createProduct(product, files);
     if (!result) return res.status(500).json({ error: 'Error creating product.' });
 
     res.json(result);
-    
 })
 
 router.get('/:id', async (req, res) => {
@@ -53,5 +55,6 @@ router.get('/delete/:id', ensureSignedIn, async (req, res) => {
     if (!result) res.status(500).json({ error: 'Error deleting product.' });
     res.json(result);
 })
+
 
 module.exports = router;

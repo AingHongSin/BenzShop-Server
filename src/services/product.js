@@ -1,8 +1,13 @@
+const mongoose = require('mongoose')
 const Product = require('../models/products');
 
-const createProduct = async (product) => {
+const createProduct = async (product, files) => {
   try {
     const newProduct = new Product(product);
+    files.forEach(file => {
+      newProduct.images.push(file.path)
+    });
+    
     const savedProduct = await newProduct.save();
     
     return {
@@ -12,7 +17,7 @@ const createProduct = async (product) => {
 } catch (error) {
     return {
       success: false,
-      data: null
+      message: error
     }
 
   }
@@ -37,6 +42,7 @@ const getAllProducts = async () => {
 const getProductById = async (id) => {
   try {
     const product = await Product.findById(id);
+
     if (!product) {
       return {
         success: false,
@@ -53,7 +59,7 @@ const getProductById = async (id) => {
     console.log(error)
     return {
       success: false,
-      data: null
+      message: error
     }
   }
 };
@@ -74,7 +80,7 @@ const updateProduct = async (productID, product) => {
 
     return {
       success: true,
-      data: updateProduct
+      data: updatedProduct
     }
 
   } catch (error) {
@@ -112,6 +118,12 @@ const searchProductByName = async(productName) => {
 
 const deleteProduct = async (productID) => {
   try {
+
+    const products = await Product.findById(productID)
+    products.images.forEach(image => {
+      
+    })
+    
     const deletedProduct = await Product.findByIdAndDelete(productID);
     if (!deletedProduct) {
       return {
@@ -121,7 +133,7 @@ const deleteProduct = async (productID) => {
     }
     return {
       success: true,
-      data: deleteProduct
+      data: deletedProduct
     }
   } catch (error) {
     return {
