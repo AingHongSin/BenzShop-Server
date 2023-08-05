@@ -1,74 +1,84 @@
+const mongoose = require('mongoose');
 const cart = require('../models/cart')
 
-const listProductsInCart = async (userId) => {
+const listProductsInCart = async (userIdStr) => {
     try {
-      // Find the user's cart based on the userId
-      const cartDB = await cart.findOne({ userId }).populate('items.productId', 'name price');
+      const userId = new mongoose.Types.ObjectId(userIdStr)
+      let cartDB = await cart.findOne({ userId }).populate('items.productId', 'title subTitle price images ');
   
-      if (!cartDB) {
-        createCart
-      }
-  
-      // Return the list of products in the cart
-      return cartDB.items;
+      return {
+        success: true,
+        data: cartDB.items || []
+      };
     } catch (error) {
       console.error('Error listing products in cart:', error);
       throw error;
     }
   }
 
-const createCart = async (userID) => {
-    const newCart = new Cart(
-        {
-            userID,
-            items: []
-        }
-    )
-}
+  const createCart = async (userId) => {
+    try {
+      const newCart = new cart({
+        userId: userId,
+        items: [], // You can initialize the items array as empty for a new cart
+      });
+  
+      const savedCart = await newCart.save();
+  
+      console.log('New cart created:', savedCart);
+      return {
+        success: true,
+        data: savedCart
+      };
+    } catch (error) {
+      console.error('Error creating cart:', error);
+      throw error;
+    }
+  };
   
 const addProductToCart = async (userId, productId, quantity = 1) => {
     try {
-      const cartDB = await cart.findOne({ userId });
-  
-      if (!cartDB) {
-        const newCart = new Cart({
-          userId,
-          items: [{ productId, quantity }],
-        });
-        await newCart.save();
-        
-      } else {
-        const existingProductIndex = cart.items.findIndex(item => item.productId.equals(productId));
-  
-        if (existingProductIndex !== -1) cartDB.items[existingProductIndex].quantity += quantity;
-        else cartDB.items.push({ productId, quantity });
-        
-  
-        await cartDB.save();
+
+      console.log("userID: ", userId)
+      let cartDB = await cart.findOne({ userId });
+
+    const productIndex = cartDB.items.findIndex(
+      (item) => item.productId.toString() === productId
+    );
+
+    if (productIndex !== -1) {
+      cartDB.items[productIndex].quantity += quantity;
+    } else {
+      cartDB.items.push({ productId, quantity });
+    }
+
+    const updatedCart = await cartDB.save();
+    
+      return {
+        success: true,
+        data: updatedCart.items,
       }
-  
-      return true;
     } catch (error) {
       console.error('Error adding product to cart:', error);
       throw error;
-    }
+      }
   }
   
 
 
 const removeProductFromCart = async (userId, productId) => {
     try {
-      const cart = await Cart.findOne({ userId });
+      const userCart = await cart.findOne({ userId });
   
-      if (!cart) {
+      if (!userCart) {
         throw new Error('Cart not found');
       }
   
-      const productIndex = cart.items.findIndex(item => item.productId.equals(productId));
+      const productIndex = userCart.items.findIndex(item => item.productId.equals(productId));
   
       if (productIndex !== -1) {
-        cart.items.splice(productIndex, 1);
-        await cart.save();
+        userCart.items.splice(productIndex, 1);
+        await userCart.save();
         return true;
       } else {
         return false;
@@ -79,4 +89,4 @@ const removeProductFromCart = async (userId, productId) => {
     }
   }
   
-module.exports = {listProductsInCart, addProductToCart, removeProductFromCart}
+module.exports = {listProductsInCart, addProductToCart, removeProductFromCart, createCart}

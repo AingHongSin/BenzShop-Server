@@ -6,7 +6,7 @@ const {ensureSignedIn,ensureSignedOut,currentUser} = require('../middleware/auth
 const express = require('express')
 const router = express.Router()
 
-router.get('/me', currentUser, async (req, res) => {
+router.get('/me', ensureSignedIn, currentUser, async (req, res) => {
     const { currentUser } = req
     const result = await getMe(currentUser.email)
     
@@ -22,8 +22,10 @@ router.post('/register', ensureSignedOut, joiValidation(registerValidation), asy
 
 router.post('/login', ensureSignedOut, joiValidation(loginValidation), async (req, res) => {
     const param = req.body
+    console.log(param);
+
     const result = await login(param.email, param.password)
-    // console.log("result: ", result.data.token)
+
     req.session.jwtToken = result.data.token
     res.json(result)
 })
@@ -44,10 +46,11 @@ router.put('/changepassword/:id', ensureSignedIn, currentUser, async (req, res) 
     res.json(result)
 })
 
-router.post('/logout', ensureSignedIn, currentUser, async (req, res) => {
-    const result = await logout(req.session)
-    console.log('cookie: ', req.cookies)
-    res.clearCookie(req.cookies)
+router.post('/logout', ensureSignedIn, function (req, res, next) {
+    console.log("session: ", req.session)
+    const result = logout(req.session)
+    // console.log('cookie: ', req.cookies)
+    // res.clearCookie('token')
     res.json(result)
 })
 module.exports = router;

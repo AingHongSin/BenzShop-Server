@@ -1,9 +1,9 @@
+const mongoose = require('mongoose')
 const Product = require('../models/products');
 
 const createProduct = async (product, files) => {
   try {
     const newProduct = new Product(product);
-  
     files.forEach(file => {
       newProduct.images.push(file.path)
     });
@@ -42,6 +42,7 @@ const getAllProducts = async () => {
 const getProductById = async (id) => {
   try {
     const product = await Product.findById(id);
+
     if (!product) {
       return {
         success: false,
@@ -58,7 +59,7 @@ const getProductById = async (id) => {
     console.log(error)
     return {
       success: false,
-      data: null
+      message: error
     }
   }
 };
@@ -132,7 +133,7 @@ const deleteProduct = async (productID) => {
     }
     return {
       success: true,
-      data: deleteProduct
+      data: deletedProduct
     }
   } catch (error) {
     return {

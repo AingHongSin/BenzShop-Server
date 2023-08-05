@@ -1,6 +1,7 @@
 const users = require('../models/user');
 const { encryptPass, decryptPass } = require('../config/encrypt')
 const jwt = require('jsonwebtoken');
+const { createCart } = require('../services/cart')
 
 
 const register = async(parameter)=>{
@@ -27,6 +28,11 @@ const register = async(parameter)=>{
         }
         console.log(newUser);
         const createUser = await users.create(newUser);
+
+        const userCart = await createCart(createUser._id)
+        console.log("Create Cart: ", userCart.success)
+
+
         return {
             success: true,
             data: createUser
@@ -38,7 +44,7 @@ const register = async(parameter)=>{
             error: err
         }
     }
-}
+    }
 const login = async(email,password)=>{
     // console.log(email);
     // console.log(validEmail);
@@ -72,13 +78,20 @@ const getMe = async(email)=>{
     try{
         const user = await users.findOne({email});
         console.log(user);
-        return user;
+        return {
+            success: true,
+            data: user
+        }
     }catch(err){
-        throw "Invalid User!";
+        // throw "Invalid User!";
+        return {
+            success: true,
+            error: error
+        }
     }
 }
 
-const lgoout = async(session) => {
+const logout = (session) => {
     try {
         session.distroy()
 
@@ -87,6 +100,7 @@ const lgoout = async(session) => {
             data:"Logged out successfully!"
         }
     } catch(error) {
+        console.log("Error: ", error)
         return {
             success: false,
             error: error
@@ -129,4 +143,4 @@ const updatePassword = async ({email}, newPassword) => {
     }
 }
 
-module.exports = {register, login, getMe, lgoout, updateUser, updatePassword}
+module.exports = {register, login, getMe, logout, updateUser, updatePassword}

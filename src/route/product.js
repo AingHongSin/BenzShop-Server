@@ -3,7 +3,6 @@ const fileUpload = require("express-fileupload")
 
 const { createProduct, getAllProducts, getProductById, updateProduct, searchProductByName, deleteProduct,  } = require("../services/product")
 const {ensureSignedIn, currentUser} = require("../middleware/authentication")
-const { filepaylodexist, fileExtLimiter, filesizelimiter } = require("../middleware/fileupload")
 const upload = require('../middleware/upload')
 const router = express.Router()
 
@@ -16,17 +15,12 @@ router.get('/', async(req, res) => {
 router.post('/create', ensureSignedIn, upload.array('images'), async (req, res) => {
     const rawProduct = req.body
     const files = req.files
-    // console.log("rawProduct: ", rawProduct)
-
     const product = JSON.parse(rawProduct.data)
-    // console.log("product: ", product)
 
     const result = await createProduct(product, files);
-
     if (!result) return res.status(500).json({ error: 'Error creating product.' });
 
     res.json(result);
-    
 })
 
 router.get('/:id', async (req, res) => {
@@ -62,14 +56,5 @@ router.get('/delete/:id', ensureSignedIn, async (req, res) => {
     res.json(result);
 })
 
-router.post('/uploadimage', ensureSignedIn, fileUpload({createParentPath: true}), filepaylodexist, fileExtLimiter(['.png', '.jpg', '.jpeg']), filesizelimiter, async(req, res) => {
-    const file = req.files
-    console.log(file)
-
-    res.json({
-        status: 'logged',
-        message: 'logged'
-    })
-})
 
 module.exports = router;
